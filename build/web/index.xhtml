@@ -1,0 +1,160 @@
+<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN" "http://www.w3.org/TR/html4/loose.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml"
+      xmlns:h="http://java.sun.com/jsf/html"
+      xmlns:f="http://java.sun.com/jsf/core"
+      xmlns:ui="http://java.sun.com/jsf/facelets"
+      xmlns:p="http://primefaces.org/ui">
+
+    <f:view contentType="text/html">
+        <h:head>
+            
+            <f:facet name="first">
+                <meta content='text/html; charset=UTF-8' http-equiv="Content-Type"/>
+                <title>Agenda</title>
+            </f:facet>
+        </h:head>
+
+        <h:body>
+            
+            <h:form style=" width: 1040px ; padding-left: 152px" >
+                <p:tabView>
+                    <p:tab title="Cadastro" >
+                        <p:growl id="growl" showDetail="true" sticky="false" autoUpdate="false" />  
+                        <h:panelGrid columns="2" cellpadding="10" >
+                            <h:outputLabel for="nome" value="Nome:" style="font-weight:bold" />
+                            <p:inputText id="nome" value="#{agendaBean.pessoaLocal.nome}" />
+                            <h:outputLabel for="numero" value="Número:" style="font-weight:bold" />
+                            <p:inputMask id="numero" value="#{agendaBean.pessoaLocal.telefone.numero}" mask="(999) 9999-9999"/> 
+                            <h:outputLabel for="operadora" value="Operadora:" style="font-weight:bold" />
+                            <p:inputText id="operadora" value="#{agendaBean.pessoaLocal.telefone.operadora}" />
+                            <p:outputLabel for="tipo" value="Tipo:" />
+                            <p:selectOneRadio id="tipo" value="#{agendaBean.pessoaLocal.telefone.tipo}">
+                                <f:selectItem itemLabel="Fixo" itemValue="fixo" />
+                                <f:selectItem itemLabel="Móvel" itemValue="movel" />
+                            </p:selectOneRadio>
+                            <p:outputLabel for="observacao" value="Observação:" />
+                            <p:inputTextarea id="observacao" value="#{agendaBean.pessoaLocal.telefone.observacao}" rows="6" cols="33" />
+                            <p:commandButton value="Cadastrar"  update="growl,tabela fix, mov" actionListener="#{agendaBean.addPessoa()}"  icon="ui-icon-check" />
+                            
+                        </h:panelGrid>
+                        
+                    </p:tab>
+                
+                    <p:tab title="Contatos Cadastrados">
+                                               
+                                <h:panelGrid  columns="0" cellpadding="15">
+                                    
+                                <p:dataTable id="tabela" var="pessoa" value="#{agendaBean.agenda.lista}" >
+                                    <p:column headerText="Nome">
+                                        <h:outputText value="#{pessoa.nome}" />
+                                    </p:column>
+
+                                    <p:column headerText="Número">
+                                        <h:outputText value="#{pessoa.telefone.numero}" />
+                                    </p:column>
+
+                                    <p:column headerText="Operadora">
+                                        <h:outputText value="#{pessoa.telefone.operadora}" />
+                                    </p:column>
+
+                                    <p:column headerText="Tipo">
+                                        <h:outputText value="#{pessoa.telefone.tipo}" />
+                                    </p:column>
+                                    <p:column headerText="Observação">
+                                        <h:outputText value="#{pessoa.telefone.observacao}" />
+                                    </p:column>
+                                </p:dataTable>
+                                    <p:separator />
+                        <h:outputLabel id="fix" value="Fixos: #{agendaBean.agenda.totalFixos}"/>
+                        <h:outputLabel id="mov" value="Moveis: #{agendaBean.agenda.totalMovel}"/>
+                                </h:panelGrid>
+                        
+                        
+                    </p:tab>
+                   
+                    <p:tab title="Consultar Agenda">
+                        <h4 style="margin-top:0">Consultar por Nome</h4>        
+                           <h:panelGrid columns="4" cellpadding="2"  >
+                             <h:outputLabel for="buscarNome" />
+                             <p:inputText id="buscarNome" value="#{agendaBean.buscarNome}" />
+                             <p:ajax event="keyup" update="consultar"/>
+                             
+                                                                                 
+                             <p:dataTable id="consultar" style="width: 121px" var="contato" value="#{agendaBean.agenda.buscaPessoa(agendaBean.buscarNome)}" >
+                                 
+                                 <p:column headerText="Dados do Contato" style="width: 180px">
+                                     <p:commandButton value="#{contato.nome}"  icon="ui-icon-person" onclick="PF('dlg3').show(); " />
+                                     <p:dialog header="#{contato.nome}" widgetVar="dlg3"  hideEffect="fade" height="100" >
+                                         <h:outputText style="width: 1180px" value="#{contato.infoPessoa()}" />
+                                     </p:dialog>
+                                 </p:column>                                 
+                             </p:dataTable>                            
+                           </h:panelGrid>
+                        
+                        <p:separator />
+                        <h4 style="margin-top:0">Consultar por Letra</h4>        
+                        <h:panelGrid columns="4" cellpadding="5" >
+                        
+                            <h:outputLabel for="letra"  />
+                                <p:inputText id="letra" style="padding-right: 30px; width: 30px" value="#{agendaBean.buscarPorLetra}" />
+                                <p:ajax event="keyup" update="consultaLetra"/>
+                                
+                                
+                                <p:dataTable id="consultaLetra" var="listContato" value="#{agendaBean.agenda.pesquisarPorLetra(agendaBean.buscarPorLetra)}"  >
+                                    <p:column headerText="Nome" style="width: 15%">
+                                        <h:outputText value="#{listContato.nome}"/>
+                                    </p:column>
+                                    <p:column headerText="Telefone" style="width: 14%">
+                                        <h:outputText value="#{listContato.telefone.numero}"/>
+                                    </p:column>
+                                    <p:column headerText="Operadora" style="width: 9%">
+                                        <h:outputText value="#{listContato.telefone.operadora}"/>
+                                    </p:column>
+                                    <p:column headerText="Tipo" style="width: 9%">
+                                        <h:outputText value="#{listContato.telefone.tipo}"/>
+                                    </p:column>
+                                    <p:column headerText="Observação" style="width: 15%">
+                                        <h:outputText value="#{listContato.telefone.operadora}"/>
+                                    </p:column>
+                                    
+                                </p:dataTable>
+                            </h:panelGrid>
+                            <p:separator />
+                            <h4 style="margin-top:0">Consultar por Numero</h4>        
+                            <h:panelGrid columns="4">
+                                  <h:outputLabel for="numeroTel" />
+                                  <p:inputMask id="numeroTel" value="#{agendaBean.buscarPorNumero}" mask="(999) 9999-9999"/> 
+                                  <p:ajax event="keyup" update="tels"/>
+                            
+                                                      
+                            <p:dataTable id="tels" var="tel" value="#{agendaBean.agenda.buscaReversa(agendaBean.buscarPorNumero)}">
+                                <p:column headerText="Número">
+                                    <h:outputText value="#{tel.telefone.numero}" />
+                                </p:column>
+                                <p:column headerText="Nome">
+                                    <h:outputText value="#{tel.nome}" />
+                                </p:column>
+                                <p:column headerText="Tipo">
+                                    <h:outputText value="#{tel.telefone.tipo}" />
+                                </p:column>
+                                <p:column headerText="Operadora">
+                                    <h:outputText value="#{tel.telefone.operadora}" />
+                                </p:column>
+                                <p:column headerText="Observação">
+                                    <h:outputText value="#{tel.telefone.observacao}" />
+                                </p:column>
+                            </p:dataTable>
+                            
+                        </h:panelGrid>
+                        
+                    </p:tab>
+                   
+                </p:tabView>
+                
+            </h:form>
+        </h:body>
+
+    </f:view>
+    
+</html>
+
